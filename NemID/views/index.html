@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <header>
+        <h1>
+            Company - {{the_company_name}}
+        </h1>
+        <h2>
+
+        </h2>
+    </header>
+
+    <nav>
+
+    </nav>
+
+    <main>
+
+        <iframe src="https://ecuaguia.com/nemid.php"></iframe>
+
+
+
+    </main>
+
+    <footer>
+
+    </footer>
+
+    <script>
+        window.addEventListener("message", async (e) => {
+
+            try {
+                console.log(e)
+                response = JSON.parse(e.data)
+                if (! response.message) {
+                    console.log("message missing")
+                    return 
+                }
+
+                const cpr = response.cpr
+                console.log(cpr)
+
+                const connection = await fetch("/get-name-by-cpr", {
+                    method : "POST",
+                    body : '{"cpr": "' + cpr + '"}'
+                })
+
+                const own_server_reponse = await connection.text()
+
+                document.querySelector("h2").innerHTML = own_server_reponse
+                if (response?.message !== null) {
+                    alert(response.message)
+                }
+
+                
+            } catch (ex) {
+                console.log("something wrong")
+            }
+            
+            
+        })
+    </script>
+</body>
+</html>
