@@ -28,7 +28,7 @@ namespace TwoFactorAuth.Controllers
 
         [HttpPost]
         [Route("Code")]
-        public async Task GenerateCode([FromBody]string JWT)
+        public async Task GenerateCode([FromBody]Token JWT)
         {
             //generate 4 digit code ---- it is a string of numbers---
             var rand = new Random();
@@ -38,12 +38,15 @@ namespace TwoFactorAuth.Controllers
                 code = code +rand.Next(10);
             }
             //add user(JWT) and their code(4 digit code) to code dictionary
-            if (JWT == "" || JWT == null)
+            if (JWT.TheToken == "" || JWT.TheToken == null)
             {
+                Console.WriteLine("###############################");
+                Console.WriteLine(JWT.TheToken);
+                Console.WriteLine("###############################");
                 throw new Exception("invalid token");
             }
             try{
-                CodeDic.Add(JWT, code);
+                CodeDic.Add(JWT.TheToken, code);
             }
             catch (ArgumentException)
             {
@@ -51,13 +54,11 @@ namespace TwoFactorAuth.Controllers
             }
             
             //add user with tries to attempt dictionary
-            AttemptDic.Add(JWT, 0);
+            AttemptDic.Add(JWT.TheToken, 0);
 
             /*
             Maybe add a function to delete the earlist user when amount surpasses a threshold?
             */
-
-
 
             //send generated code to phone via FatSMS
 
@@ -74,9 +75,6 @@ namespace TwoFactorAuth.Controllers
             try
             {
                 HttpResponseMessage response = await client.PostAsync("https://fatsms.com/send-sms", formcontent);
-                //Console.WriteLine("########################");
-                //Console.WriteLine(response.ToString());
-                //Console.WriteLine("########################");
             }
             catch (Exception e)
             {
@@ -85,13 +83,7 @@ namespace TwoFactorAuth.Controllers
                 //send email? SMTP?
             }
             
-            //test area
-            Console.WriteLine("#####################");
-                foreach (var item in CodeDic)
-                {
-                    Console.WriteLine(item.Key);
-                }
-            Console.WriteLine("#####################");
+        
             //success?
         }
 
@@ -100,16 +92,20 @@ namespace TwoFactorAuth.Controllers
         public bool compareCode([FromBody]Authentication auth){
             //compare code in memory with given code
             bool ret = false;
+            Console.WriteLine("#######################");
             foreach (var entry in CodeDic)
             {
                 //Find user in memory
                 if (entry.Key != auth.JWToken)
                 {
+                    Console.WriteLine("no match" + entry.Key + " " + auth.JWToken);
+
                     continue;
                 }
                 //when user found: check if correct code
                 if (entry.Value == auth.Code)
                 {
+                    Console.WriteLine("match");
                     //ret becomes true if answer is correct
                     ret = true;
                     //erase user from memory
@@ -117,12 +113,14 @@ namespace TwoFactorAuth.Controllers
                 }
                 else
                 {
+                    Console.WriteLine("wrong code");
                     //erase user and code if 3 wrong answers. 3 strikes you are out!
                     Codecheck(entry.Key, ret);
                 }
             }
             //returns true if user was found AND code was correct, otherwise false.
             return ret;
+            Console.WriteLine("#######################");
         }
 
         /// <summary>
