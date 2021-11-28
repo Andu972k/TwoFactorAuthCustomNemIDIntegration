@@ -28,7 +28,7 @@ namespace TwoFactorAuth.Controllers
 
         [HttpPost]
         [Route("Code")]
-        public async Task GenerateCode([FromBody]Token JWT)
+        public async Task GenerateCode([FromBody]string JWT)
         {
             //generate 4 digit code ---- it is a string of numbers---
             var rand = new Random();
@@ -38,15 +38,12 @@ namespace TwoFactorAuth.Controllers
                 code = code +rand.Next(10);
             }
             //add user(JWT) and their code(4 digit code) to code dictionary
-            if (JWT.TheToken == "" || JWT.TheToken == null)
+            if (JWT == "" || JWT == null)
             {
-                Console.WriteLine("###############################");
-                Console.WriteLine(JWT.TheToken);
-                Console.WriteLine("###############################");
                 throw new Exception("invalid token");
             }
             try{
-                CodeDic.Add(JWT.TheToken, code);
+                CodeDic.Add(JWT, code);
             }
             catch (ArgumentException)
             {
@@ -54,8 +51,8 @@ namespace TwoFactorAuth.Controllers
             }
             
             //add user with tries to attempt dictionary
-            AttemptDic.Add(JWT.TheToken, 0);
-
+            AttemptDic.Add(JWT, 0);
+ 
             /*
             Maybe add a function to delete the earlist user when amount surpasses a threshold?
             */
@@ -119,8 +116,9 @@ namespace TwoFactorAuth.Controllers
                 }
             }
             //returns true if user was found AND code was correct, otherwise false.
-            return ret;
             Console.WriteLine("#######################");
+            return ret;
+            
         }
 
         /// <summary>
