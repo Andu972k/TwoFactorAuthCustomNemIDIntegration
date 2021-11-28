@@ -83,9 +83,9 @@ namespace TwoFactorAuth.Controllers
 
         [HttpPost]
         [Route("Auth")]
-        public bool compareCode([FromBody]Authentication auth){
+        public int compareCode([FromBody]Authentication auth){
             //compare code in memory with given code
-            bool ret = false;
+            int ret = 1;
             foreach (var entry in CodeDic)
             {
                 //Find user in memory
@@ -96,18 +96,20 @@ namespace TwoFactorAuth.Controllers
                 //when user found: check if correct code
                 if (entry.Value == auth.Code)
                 {
-                    //ret becomes true if answer is correct
-                    ret = true;
+                    //ret becomes 1 if answer is correct
+                    ret = 0;
                     //erase user from memory
                     Codecheck(entry.Key, ret);
+                    break;
                 }
                 else
                 {
                     //erase user and code if 3 wrong answers. 3 strikes you are out!
-                    Codecheck(entry.Key, ret);
+                   ret = Codecheck(entry.Key, ret);
+                   break;
                 }
             }
-            //returns true if user was found AND code was correct, otherwise false.
+            //returns 0 if registered user with correct code. 1 if wrong- user or code. 2 if no more tries left.
             return ret;
             
         }
@@ -119,16 +121,23 @@ namespace TwoFactorAuth.Controllers
         /// </summary>
         /// <param name="key">The users JWT(JSON Web Token)</param>
         /// <param name="attempt">Did the user use corect code?</param>
-        private void Codecheck(string key, bool attempt)
+        private int Codecheck(string key, int attempt)
         {
             //add one to their attempts
-            AttemptDic[key] = AttemptDic[key] + 1;
+            AttemptDic[key] ++;
             //check if they should be deleted
-            if (AttemptDic[key] >= 3 || attempt == true)
+            if (AttemptDic[key] >= 3 )
             {
                 AttemptDic.Remove(key);
                 CodeDic.Remove(key);
+                return 2;
             }
+            else if(attempt == 0){
+                AttemptDic.Remove(key);
+                CodeDic.Remove(key);
+                return 0;
+            }
+            return 1;
         }
     }
 }
