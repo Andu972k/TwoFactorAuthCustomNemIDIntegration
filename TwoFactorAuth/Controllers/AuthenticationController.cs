@@ -38,10 +38,18 @@ namespace TwoFactorAuth.Controllers
                 code = code +rand.Next(10);
             }
             //add user(JWT) and their code(4 digit code) to code dictionary
-            if(CodeDic[JWT] != null){
-                
+            if (JWT == "" || JWT == null)
+            {
+                throw new Exception("invalid token");
             }
-            CodeDic.Add(JWT, code);
+            try{
+                CodeDic.Add(JWT, code);
+            }
+            catch (ArgumentException)
+            {
+                throw new Exception("User already exist");
+            }
+            
             //add user with tries to attempt dictionary
             AttemptDic.Add(JWT, 0);
 

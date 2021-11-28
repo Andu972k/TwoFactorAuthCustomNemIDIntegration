@@ -32,6 +32,7 @@ namespace TwoFactorAuth
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TwoFactorAuth", Version = "v1" });
             });
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,6 +46,12 @@ namespace TwoFactorAuth
             }
 
             //app.UseHttpsRedirection();
+             app.UseCors(options => options
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowAnyOrigin()
+                .WithOrigins(frontendURL)
+            );
 
             app.UseRouting();
 
