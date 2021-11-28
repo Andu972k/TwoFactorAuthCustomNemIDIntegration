@@ -16,19 +16,19 @@ namespace TwoFactorAuth.Controllers
     public class AuthenticationController : ControllerBase
     {
         //Memory space for authentication codes. key = JWT. value = Code.
-        Dictionary<string, string> CodeDic = new Dictionary<string, string>();
+        private static Dictionary<string, string> CodeDic = new Dictionary<string, string>();
         //Attempt dictionary
-        Dictionary<string, int> AttemptDic = new Dictionary<string, int>();
+        private static Dictionary<string, int> AttemptDic = new Dictionary<string, int>();
         //API key for fatSMS
-        string apikey = "fe8f0664-f2ac-40fa-bf91-b4506ecf3d90";
+        private string apikey = "fe8f0664-f2ac-40fa-bf91-b4506ecf3d90";
         //phonenumber to send message for fatSMS
-        string phoneNumber = "53447600";
+        private string phoneNumber = "53447600";
         //HTTP client for requests
         private static readonly HttpClient client = new HttpClient();
 
         [HttpPost]
         [Route("Code")]
-        public async Task GenerateCode([FromBody]string body)
+        public async Task GenerateCode([FromBody]string JWT)
         {
             //generate 4 digit code ---- it is a string of numbers---
             var rand = new Random();
@@ -38,9 +38,12 @@ namespace TwoFactorAuth.Controllers
                 code = code +rand.Next(10);
             }
             //add user(JWT) and their code(4 digit code) to code dictionary
-            CodeDic.Add(body, code);
+            if(CodeDic[JWT] != null){
+                
+            }
+            CodeDic.Add(JWT, code);
             //add user with tries to attempt dictionary
-            AttemptDic.Add(body, 0);
+            AttemptDic.Add(JWT, 0);
 
             /*
             Maybe add a function to delete the earlist user when amount surpasses a threshold?
@@ -50,19 +53,22 @@ namespace TwoFactorAuth.Controllers
 
             //send generated code to phone via FatSMS
 
-            //packet to send to fatsms
-            var packet = new Dictionary<string, string>
+           
+            var formcontent = new FormUrlEncodedContent(new []
             {
-                { "to_phone", phoneNumber },
-                { "message", code },
-                {"api_key", apikey }
-            };
+                new KeyValuePair<string, string>("to_phone", phoneNumber),
+                new KeyValuePair<string, string>("message", code),
+                new KeyValuePair<string, string>("api_key", apikey)
+            });
             //serialize content packet to send via http request
-            HttpContent content = new StringContent(JsonSerializer.Serialize(packet), Encoding.UTF8, "application/json");
+            //HttpContent content = new StringContent(JsonSerializer.Serialize(packet), Encoding.UTF8, "application/json");
             //Make http request to fatSMS
             try
             {
-                HttpResponseMessage response = await client.PostAsync("https://fatsms.com/send-sms", content);
+                HttpResponseMessage response = await client.PostAsync("https://fatsms.com/send-sms", formcontent);
+                //Console.WriteLine("########################");
+                //Console.WriteLine(response.ToString());
+                //Console.WriteLine("########################");
             }
             catch (Exception e)
             {
@@ -71,6 +77,13 @@ namespace TwoFactorAuth.Controllers
                 //send email? SMTP?
             }
             
+            //test area
+            Console.WriteLine("#####################");
+                foreach (var item in CodeDic)
+                {
+                    Console.WriteLine(item.Key);
+                }
+            Console.WriteLine("#####################");
             //success?
         }
 
