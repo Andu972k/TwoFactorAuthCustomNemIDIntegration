@@ -57,17 +57,14 @@ namespace TwoFactorAuth.Controllers
             Maybe add a function to delete the earlist user when amount surpasses a threshold?
             */
 
-            //send generated code to phone via FatSMS
-
-           
+           //make form content of JSON type to send to FatSMS. includes new code.
             var formcontent = new FormUrlEncodedContent(new []
             {
                 new KeyValuePair<string, string>("to_phone", phoneNumber),
                 new KeyValuePair<string, string>("message", code),
                 new KeyValuePair<string, string>("api_key", apikey)
             });
-            //serialize content packet to send via http request
-            //HttpContent content = new StringContent(JsonSerializer.Serialize(packet), Encoding.UTF8, "application/json");
+
             //Make http request to fatSMS
             try
             {
@@ -89,20 +86,16 @@ namespace TwoFactorAuth.Controllers
         public bool compareCode([FromBody]Authentication auth){
             //compare code in memory with given code
             bool ret = false;
-            Console.WriteLine("#######################");
             foreach (var entry in CodeDic)
             {
                 //Find user in memory
                 if (entry.Key != auth.JWToken)
                 {
-                    Console.WriteLine("no match" + entry.Key + " " + auth.JWToken);
-
                     continue;
                 }
                 //when user found: check if correct code
                 if (entry.Value == auth.Code)
                 {
-                    Console.WriteLine("match");
                     //ret becomes true if answer is correct
                     ret = true;
                     //erase user from memory
@@ -110,13 +103,11 @@ namespace TwoFactorAuth.Controllers
                 }
                 else
                 {
-                    Console.WriteLine("wrong code");
                     //erase user and code if 3 wrong answers. 3 strikes you are out!
                     Codecheck(entry.Key, ret);
                 }
             }
             //returns true if user was found AND code was correct, otherwise false.
-            Console.WriteLine("#######################");
             return ret;
             
         }
