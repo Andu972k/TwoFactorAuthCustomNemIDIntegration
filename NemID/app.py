@@ -1,4 +1,4 @@
-from bottle import run, get, view, post, request
+from bottle import route, run, get, view, post, request, static_file
 import json
 
 ##############################
@@ -10,6 +10,18 @@ def do():
 
 
 ##############################
+
+
+@route("/static/<filepath:re:.*\.js>")
+def send_js(filepath):
+    return static_file(filepath, root="js/")
+
+@route("/static/<filepath:re:.*\.css>")
+def send_css(filepath):
+    return static_file(filepath, root="css/")
+
+##############################
+
 
 @post("/get-name-by-cpr")
 def do():

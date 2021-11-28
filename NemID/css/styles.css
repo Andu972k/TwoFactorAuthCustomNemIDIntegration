@@ -1,0 +1,27 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+div.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    top: 0;
+    left: 0;
+    background-color: rgba(0,0,0,0.4);
+}
+
+div.modalContent {
+    height: 10rem;
+    width: 80%;
+    background-color: #FFFFFF;
+    margin: auto;
+}
+
+span.closeModal {
+    float: right;
+}

