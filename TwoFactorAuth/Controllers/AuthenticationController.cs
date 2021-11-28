@@ -30,17 +30,24 @@ namespace TwoFactorAuth.Controllers
         [Route("Code")]
         public async Task GenerateCode([FromBody]string body)
         {
-            //generate code - 4 digit ---- it is string ---
+            //generate 4 digit code ---- it is a string of numbers---
             var rand = new Random();
             string code = "";
             for(int i = 0; i<=3; i++)
             {
                 code = code +rand.Next(10);
             }
-            //add user and code to code dictionary
+            //add user(JWT) and their code(4 digit code) to code dictionary
             CodeDic.Add(body, code);
             //add user with tries to attempt dictionary
             AttemptDic.Add(body, 0);
+
+            /*
+            Maybe add a function to delete the earlist user when amount surpasses a threshold?
+            */
+
+
+
             //send generated code to phone via FatSMS
 
             //packet to send to fatsms
@@ -50,7 +57,7 @@ namespace TwoFactorAuth.Controllers
                 { "message", code },
                 {"api_key", apikey }
             };
-            
+            //serialize content packet to send via http request
             HttpContent content = new StringContent(JsonSerializer.Serialize(packet), Encoding.UTF8, "application/json");
             //Make http request to fatSMS
             try
@@ -74,29 +81,45 @@ namespace TwoFactorAuth.Controllers
             bool ret = false;
             foreach (var entry in CodeDic)
             {
+                //Find user in memory
                 if (entry.Key != auth.JWToken)
                 {
                     continue;
                 }
+                //when user found: check if correct code
                 if (entry.Value == auth.Code)
                 {
-                    //return answer depending on whether they are the same or not
+                    //ret becomes true if answer is correct
                     ret = true;
+                    //erase user from memory
+                    Codecheck(entry.Key, ret);
                 }
                 else
                 {
-                    //erase current code if: 3 wrong answers or correct answer
+                    //erase user and code if 3 wrong answers. 3 strikes you are out!
+                    Codecheck(entry.Key, ret);
                 }
             }
-            
+            //returns true if user was found AND code was correct, otherwise false.
             return ret;
         }
-        private void CodeCount(string Key)
+
+        /// <summary>
+        /// method for when a registered user has tried to login
+        /// will delete user if 3 wrong attempts.
+        /// Also deletes user info if correct code.
+        /// </summary>
+        /// <param name="key">The users JWT(JSON Web Token)</param>
+        /// <param name="attempt">Did the user use corect code?</param>
+        private void Codecheck(string key, bool attempt)
         {
-            AttemptDic[Key] = AttemptDic[Key] + 1;
-            if (AttemptDic[key] >= 3)
+            //add one to their attempts
+            AttemptDic[key] = AttemptDic[key] + 1;
+            //check if they should be deleted
+            if (AttemptDic[key] >= 3 || attempt == true)
             {
-                //AttemptDic.Remove
+                AttemptDic.Remove(key);
+                CodeDic.Remove(key);
             }
         }
     }
