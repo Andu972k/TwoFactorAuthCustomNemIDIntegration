@@ -532,3 +532,5 @@ cython_debug/
 *.ps1
 *.cfg
 .vscode
+
+NemID/Scripts/
