@@ -50,7 +50,6 @@ namespace TwoFactorAuth
                 .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowAnyOrigin()
-                .WithOrigins(frontendURL)
             );
 
             app.UseRouting();
