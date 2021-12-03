@@ -22,7 +22,8 @@ namespace TwoFactorAuth.Controllers
         //API key for fatSMS
         private string apikey = "fe8f0664-f2ac-40fa-bf91-b4506ecf3d90";
         //phonenumber to send message for fatSMS
-        private string phoneNumber = "53447600";
+        private string phoneNumberJoachim = "53447600";
+        private string phoneNumberAnders = "60774554";
         //HTTP client for requests
         private static readonly HttpClient client = new HttpClient();
 
@@ -60,7 +61,7 @@ namespace TwoFactorAuth.Controllers
            //make form content of JSON type to send to FatSMS. includes new code.
             var formcontent = new FormUrlEncodedContent(new []
             {
-                new KeyValuePair<string, string>("to_phone", phoneNumber),
+                new KeyValuePair<string, string>("to_phone", phoneNumberAnders),
                 new KeyValuePair<string, string>("message", code),
                 new KeyValuePair<string, string>("api_key", apikey)
             });
